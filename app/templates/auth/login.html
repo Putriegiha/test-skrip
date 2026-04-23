@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Login</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <h1>Login</h1>
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <ul>
+      {% for m in messages %}
+      <li>{{ m }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+    <form method="post">
+      {{ form.csrf_token }}
+      <label>Email: {{ form.email(size=32) }}</label><br />
+      <label>Password: {{ form.password() }}</label><br />
+      {{ form.submit() }}
+    </form>
+    <p>
+      Belum punya akun? <a href="{{ url_for('auth.register') }}">Register</a>
+    </p>
+  </body>
+</html>

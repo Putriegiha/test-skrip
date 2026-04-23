@@ -1,0 +1,16 @@
+{% extends 'base.html' %} {% block title %}Wishlist{% endblock %} {% block
+content %}
+<h1>Wishlist</h1>
+<ul>
+  {% for d in destinasi %}
+  <li>
+    <a href="{{ url_for('rekomendasi.detail', id_destinasi=d.ID_DESTINASI) }}"
+      >{{ d.NAMA_DESTINASI }}</a
+    >
+    — {{ d.KABUPATEN_KOTA }} — {{ d.JENIS_WISATA }}
+  </li>
+  {% else %}
+  <li>Wishlist kosong.</li>
+  {% endfor %}
+</ul>
+{% endblock %}

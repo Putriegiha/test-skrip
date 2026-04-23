@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Beranda</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <script>
+      function csrfFetch(url, opts = {}) {
+        const token = document.querySelector('meta[name="csrf-token"]').content;
+        opts.headers = Object.assign({}, opts.headers, {
+          "X-CSRFToken": token,
+          "Content-Type": "application/json",
+        });
+        return fetch(url, opts);
+      }
+    </script>
+  </head>
+  <body>
+    {% extends 'base.html' %} {% block title %}Beranda{% endblock %} {% block
+    content %}
+    <h1>Rekomendasi</h1>
+    <ul>
+      {% for d in dests %}
+      <li>
+        <a href="/destinasi/{{ d.ID_DESTINASI }}">{{ d.NAMA_DESTINASI }}</a> -
+        {{ d.KABUPATEN_KOTA }}
+        <button
+          class="like-btn"
+          role="button"
+          aria-pressed="false"
+          data-id="{{ d.ID_DESTINASI }}"
+        >
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 21s-6.716-4.35-9.243-6.653C-1.29 10.91 2.03 4 7.5 6.5 10 8 12 10 12 10s2-2 4.5-3.5C20 4 23.29 10.91 21.243 14.347 18.716 17.65 12 21 12 21z"
+              stroke="#333"
+              stroke-width="1"
+            />
+          </svg>
+          <span>Like</span>
+        </button>
+        <button
+          class="wish-btn"
+          role="button"
+          aria-pressed="false"
+          data-id="{{ d.ID_DESTINASI }}"
+        >
+          <svg
+            class="icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M6 2h12v2H6zM4 6h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"
+              stroke="#333"
+              stroke-width="1"
+            />
+          </svg>
+          <span>Wishlist</span>
+        </button>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endblock %} {% block scripts %}
+    <script>
+      document.querySelectorAll(".like-btn").forEach((b) =>
+        b.addEventListener("click", async (e) => {
+          const id = b.dataset.id;
+          b.disabled = true;
+          try {
+            const res = await csrfFetch(`/destinasi/${id}/like`, {
+              method: "POST",
+            });
+            const j = await res.json();
+            if (j.status === "liked") {
+              b.classList.add("active");
+              b.textContent = "Liked";
+              b.setAttribute("aria-pressed", "true");
+            } else if (j.status === "unliked") {
+              b.classList.remove("active");
+              b.textContent = "Like";
+              b.setAttribute("aria-pressed", "false");
+            }
+          } catch (err) {
+            console.error(err);
+          } finally {
+            b.disabled = false;
+          }
+        }),
+      );
+      document.querySelectorAll(".wish-btn").forEach((b) =>
+        b.addEventListener("click", async (e) => {
+          const id = b.dataset.id;
+          b.disabled = true;
+          try {
+            const res = await csrfFetch(`/destinasi/${id}/wishlist`, {
+              method: "POST",
+            });
+            const j = await res.json();
+            if (j.status === "wishlisted") {
+              b.classList.add("wish-active");
+              b.textContent = "Wishlisted";
+              b.setAttribute("aria-pressed", "true");
+            } else if (j.status === "unwishlisted" || j.status === "removed") {
+              b.classList.remove("wish-active");
+              b.textContent = "Wishlist";
+              b.setAttribute("aria-pressed", "false");
+            }
+          } catch (err) {
+            console.error(err);
+          } finally {
+            b.disabled = false;
+          }
+        }),
+      );
+      // keyboard activation for accessibility (Enter / Space)
+      document.querySelectorAll(".like-btn, .wish-btn").forEach((btn) => {
+        btn.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            btn.click();
+          }
+        });
+      });
+    </script>
+    {% endblock %}
+  </body>
+</html>

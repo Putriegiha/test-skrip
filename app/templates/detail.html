@@ -1,0 +1,151 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>{{ dest.NAMA_DESTINASI }}</title>
+    {% extends 'base.html' %} {% block title %}{{ dest.NAMA_DESTINASI }}{%
+    endblock %} {% block content %}
+    <h1>{{ dest.NAMA_DESTINASI }}</h1>
+    <p>{{ dest.DESKRIPSI }}</p>
+    <p>
+      {{ dest.KABUPATEN_KOTA }} — {{ dest.JENIS_WISATA }} — Rating: {{
+      dest.RATING }}
+    </p>
+    <p><a href="{{ url_for('rekomendasi.home') }}">Kembali</a></p>
+    <button
+      id="like-btn"
+      role="button"
+      aria-pressed="false"
+      data-id="{{ dest.ID_DESTINASI }}"
+    >
+      <svg
+        class="icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M12 21s-6.716-4.35-9.243-6.653C-1.29 10.91 2.03 4 7.5 6.5 10 8 12 10 12 10s2-2 4.5-3.5C20 4 23.29 10.91 21.243 14.347 18.716 17.65 12 21 12 21z"
+          stroke="#333"
+          stroke-width="1"
+        />
+      </svg>
+      <span>Like</span>
+    </button>
+    <button
+      id="wish-btn"
+      role="button"
+      aria-pressed="false"
+      data-id="{{ dest.ID_DESTINASI }}"
+    >
+      <svg
+        class="icon"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 2h12v2H6zM4 6h16v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6z"
+          stroke="#333"
+          stroke-width="1"
+        />
+      </svg>
+      <span>Wishlist</span>
+    </button>
+    {% endblock %} {% block scripts %}
+    <script>
+      const likeBtn = document.getElementById("like-btn");
+      const wishBtn = document.getElementById("wish-btn");
+      likeBtn.addEventListener("click", async () => {
+        likeBtn.disabled = true;
+        try {
+          const res = await csrfFetch(`/destinasi/${likeBtn.dataset.id}/like`, {
+            method: "POST",
+          });
+          const j = await res.json();
+          if (j.status === "liked") {
+            likeBtn.classList.add("active");
+            likeBtn.textContent = "Liked";
+            likeBtn.setAttribute("aria-pressed", "true");
+          } else {
+            likeBtn.classList.remove("active");
+            likeBtn.textContent = "Like";
+            likeBtn.setAttribute("aria-pressed", "false");
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          likeBtn.disabled = false;
+        }
+      });
+      wishBtn.addEventListener("click", async () => {
+        wishBtn.disabled = true;
+        try {
+          const res = await csrfFetch(
+            `/destinasi/${wishBtn.dataset.id}/wishlist`,
+            { method: "POST" },
+          );
+          const j = await res.json();
+          if (j.status === "wishlisted") {
+            wishBtn.classList.add("wish-active");
+            wishBtn.textContent = "Wishlisted";
+            wishBtn.setAttribute("aria-pressed", "true");
+          } else {
+            wishBtn.classList.remove("wish-active");
+            wishBtn.textContent = "Wishlist";
+            wishBtn.setAttribute("aria-pressed", "false");
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          wishBtn.disabled = false;
+        }
+      });
+      // keyboard activation
+      [likeBtn, wishBtn].forEach((btn) =>
+        btn.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            btn.click();
+          }
+        }),
+      );
+    </script>
+    {% endblock %}
+  </head>
+  <body>
+    <h1>{{ dest.NAMA_DESTINASI }}</h1>
+    <p>{{ dest.DESKRIPSI }}</p>
+    <p>
+      {{ dest.KABUPATEN_KOTA }} — {{ dest.JENIS_WISATA }} — Rating: {{
+      dest.RATING }}
+    </p>
+    <p><a href="{{ url_for('rekomendasi.home') }}">Kembali</a></p>
+    <button id="like-btn" data-id="{{ dest.ID_DESTINASI }}">Like</button>
+    <button id="wish-btn" data-id="{{ dest.ID_DESTINASI }}">Wishlist</button>
+
+    <script>
+      async function postAction(url) {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+        });
+        return res.json();
+      }
+      document
+        .getElementById("like-btn")
+        .addEventListener("click", async () => {
+          const id = document.getElementById("like-btn").dataset.id;
+          const res = await postAction(`/destinasi/${id}/like`);
+          alert(res.status || "error");
+        });
+      document
+        .getElementById("wish-btn")
+        .addEventListener("click", async () => {
+          const id = document.getElementById("wish-btn").dataset.id;
+          const res = await postAction(`/destinasi/${id}/wishlist`);
+          alert(res.status || "error");
+        });
+    </script>
+  </body>
+</html>

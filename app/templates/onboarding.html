@@ -1,0 +1,27 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Onboarding</title>
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <h1>Pilih 2 Kategori Wisata</h1>
+    {% with messages = get_flashed_messages() %} {% if messages %}
+    <ul>
+      {% for m in messages %}
+      <li>{{ m }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %} {% endwith %}
+    <form method="post">
+      {% for c in categories %}
+      <label
+        ><input type="checkbox" name="kategori" value="{{ c }}" /> {{ c
+        }}</label
+      ><br />
+      {% endfor %}
+      <button type="submit">Lanjutkan</button>
+    </form>
+  </body>
+</html>
